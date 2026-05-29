@@ -23,5 +23,9 @@ import (
 )
 
 func canIgnoreSignal(s os.Signal) bool {
-	return s == unix.SIGURG
+	// SIGURG is used internally by the Go runtime; SIGCHLD is delivered when
+	// the container's foreground process exits and must not be forwarded into
+	// the task (doing so races the wait loop and logs a spurious
+	// "forward signal child exited" error). Neither is meaningful to forward.
+	return s == unix.SIGURG || s == unix.SIGCHLD
 }
